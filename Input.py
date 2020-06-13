@@ -32,7 +32,7 @@ def connect_and_test_db():
 
     try:
         sql = "SELECT name from placex \
-            where name->'name' like 'Monaco' limit 1;"
+where name->'name' like 'Monaco' limit 1;"
         cursor.execute(sql)
         record = cursor.fetchone()
         print(sql, "\n")
@@ -46,14 +46,14 @@ def connect_and_test_db():
     print("Trying to create doc")
 
     sql = "SELECT place_id, osm_id, osm_type, name, address, \
-        country_code, housenumber, postcode from placex \
-        where name->'name' like 'Monaco' limit 1 "
+country_code, housenumber, postcode from placex \
+where name->'name' like 'Monaco' limit 1 "
     cursor.execute(sql)
     record = cursor.fetchone()
     print(sql, "\n")
 
-    place_id, osm_id, osm_type, name, address, country_code, housenumber,\
-        postcode = record[0]
+    place_id, osm_id, osm_type, name, address, country_code, housenumber, \
+        postcode = record
     doc = Doc(place_id, osm_id, osm_type, name, address,
                   country_code, housenumber, postcode)
 
