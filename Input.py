@@ -5,6 +5,14 @@ import json
 
 
 def connect_and_test_db():
+    connection = connect_to_db()
+    get_dsn_parameters(connection)
+    fetch_test(connection)
+    fetch_and_create_doc(connection)
+
+
+
+def connect_to_db():
     print("=================================================================")
     print("Trying to create a connection")
     try:
@@ -15,12 +23,13 @@ def connect_and_test_db():
             port="5432",
             database="nominatim"
         )
-        cursor = connection.cursor(cursor_factory=RealDictCursor)
         print("Success")
+        return connection
     except:
         print("Failed")
         exit
 
+def get_dsn_parameters(connection):
     print("=================================================================")
     print("Trying to print DSN parameters: ")
     try:
@@ -29,27 +38,32 @@ def connect_and_test_db():
         print("Failed")
         exit
 
+def fetch_test(connection):
     print("=================================================================")
     print("Trying to fetch from placex table: ")
 
     try:
         sql = "SELECT name from placex \
 where name->'name' like 'Monaco' limit 1;"
+        cursor = connection.cursor(cursor_factory=RealDictCursor)
         cursor.execute(sql)
         record = cursor.fetchone()
         print(sql, "\n")
         print(json.dumps(record))
+        cursor.close()
 
     except:
         print("Failed")
         exit
 
+def fetch_and_create_doc(connection):
     print("=================================================================")
     print("Trying to create doc")
 
     sql = "SELECT place_id, osm_id, osm_type, name, address, \
 country_code, housenumber, postcode from placex \
 where name->'name' like 'Monaco' limit 1 "
+    cursor = connection.cursor(cursor_factory=RealDictCursor)
     cursor.execute(sql)
     record = cursor.fetchone()
     print(sql, "\n")
@@ -61,9 +75,6 @@ where name->'name' like 'Monaco' limit 1 "
 
     print("osm_id: ", doc.osm_id)
     print("osm_type: ", doc.osm_type)
-
-    print("=================================================================")
-    print("Closing connection")
     cursor.close()
 
 
