@@ -1,5 +1,5 @@
 import psycopg2
-from psycopg2.extras import RealDictCursor
+from psycopg2.extras import RealDictCursor, DictCursor
 from Doc import Doc
 import json
 
@@ -9,6 +9,7 @@ def connect_and_test_db():
     get_dsn_parameters(connection)
     fetch_test(connection)
     fetch_and_create_doc(connection)
+    return connection
 
 
 
@@ -45,7 +46,7 @@ def fetch_test(connection):
     try:
         sql = "SELECT name from placex \
 where name->'name' like 'Monaco' limit 1;"
-        cursor = connection.cursor(cursor_factory=RealDictCursor)
+        cursor = connection.cursor(cursor_factory=DictCursor)
         cursor.execute(sql)
         record = cursor.fetchone()
         print(sql, "\n")
@@ -56,28 +57,29 @@ where name->'name' like 'Monaco' limit 1;"
         print("Failed")
         exit
 
-def fetch_and_create_doc(connection):
+def fetch_and_create_doc(connection, name="Monaco"):
     print("=================================================================")
-    print("Trying to create doc")
+    print("Trying to fetch row and create doc")
 
     sql = "SELECT place_id, osm_id, osm_type, name, address, \
 country_code, housenumber, postcode from placex \
-where name->'name' like 'Monaco' limit 1 "
+where name->'name' like '" + name + "' limit 1 "
     cursor = connection.cursor(cursor_factory=RealDictCursor)
     cursor.execute(sql)
     record = cursor.fetchone()
     print(sql, "\n")
 
-    place_id, osm_id, osm_type, name, address, country_code, housenumber, \
-        postcode = record.values()
-    doc = Doc(place_id, osm_id, osm_type, name, address,
-                  country_code, housenumber, postcode)
+    # place_id, osm_id, osm_type, name, address, country_code, housenumber, \
+    #     postcode = record.values()
+    doc = Doc(record)
 
     print("osm_id: ", doc.osm_id)
     print("osm_type: ", doc.osm_type)
     cursor.close()
+    return doc
 
 
-connect_and_test_db()
+if __name__ == "__main__":
+    connect_and_test_db()
 
 # test_doc()
