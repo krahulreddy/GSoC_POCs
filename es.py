@@ -6,15 +6,19 @@ import time
 
 
 def test_es_connection():
+    print("=================================================================")
+    print("Testing Elasticsearch connection")
     try:
-        print(elasticsearch.ping())
-        print(elasticsearch.info())
+        elasticsearch = Elasticsearch()
+        print("Ping successful?", elasticsearch.ping())
+        print("Info: ", elasticsearch.info())
     except:
         print("Failed. Start the elasticsearch server and try again.")
         exit
+    return elasticsearch
 
 
-def create_index():
+def create_index(elasticsearch, index_name):
     print("=================================================================")
     print("Trying to create an index")
     try:
@@ -28,21 +32,17 @@ def create_index():
         print("Failed")
 
 
-def insert_doc():
+def insert_doc(elasticsearch, index_name, doc={"age": 21, "first name": "Rahul", "last name": "Reddy"}):
     print("=================================================================")
     print("Trying to insert doc into", index_name)
     try:
-        doc = {"age": 21, "first name": "Rahul", "last name": "Reddy"}
         elasticsearch.index(index_name, doc_type="_doc",
                             body=doc)
         print("Indexed " + str(doc) + " successfully")
-        print("Waiting for 3 seconds for changes to reflect")
-        time.sleep(3)
-
     except:
         print("Failed")
 
-def search_results():
+def search_results(elasticsearch, index_name):
     print("=================================================================")
     print("Trying to search for `Rahul` from", index_name)
     try:
@@ -50,7 +50,7 @@ def search_results():
     except:
         print("Failed")
 
-def delete_index():
+def delete_index(elasticsearch, index_name):
     print("=================================================================")
     print("Trying to delete an index")
     try:
@@ -66,10 +66,12 @@ def delete_index():
 
 
 if __name__ == "__main__":
-    elasticsearch = Elasticsearch()
     index_name = "nominatim_test"
-    test_es_connection()
-    create_index()
-    insert_doc()
-    search_results()
-    delete_index()
+    elasticsearch = test_es_connection()
+    create_index(elasticsearch, index_name)
+    doc = {"age": 21, "first name": "Rahul", "last name": "Reddy"}
+    insert_doc(elasticsearch, index_name, doc)
+    print("Waiting for 3 seconds for changes to reflect")
+    time.sleep(3)
+    search_results(elasticsearch, index_name)
+    delete_index(elasticsearch, index_name)
