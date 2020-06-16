@@ -1,5 +1,7 @@
 import psycopg2
+from psycopg2.extras import RealDictCursor
 from Doc import Doc
+import json
 
 
 def connect_and_test_db():
@@ -13,7 +15,7 @@ def connect_and_test_db():
             port="5432",
             database="nominatim"
         )
-        cursor = connection.cursor()
+        cursor = connection.cursor(cursor_factory=RealDictCursor)
         print("Success")
     except:
         print("Failed")
@@ -36,7 +38,7 @@ where name->'name' like 'Monaco' limit 1;"
         cursor.execute(sql)
         record = cursor.fetchone()
         print(sql, "\n")
-        print(record)
+        print(json.dumps(record))
 
     except:
         print("Failed")
@@ -53,7 +55,7 @@ where name->'name' like 'Monaco' limit 1 "
     print(sql, "\n")
 
     place_id, osm_id, osm_type, name, address, country_code, housenumber, \
-        postcode = record
+        postcode = record.values()
     doc = Doc(place_id, osm_id, osm_type, name, address,
                   country_code, housenumber, postcode)
 
