@@ -1,9 +1,8 @@
 from elasticsearch import Elasticsearch
 from urllib.request import urlopen
 import json
+import time
 
-elasticsearch = Elasticsearch()
-index_name = "nominatim_test"
 
 
 def test_es_connection():
@@ -37,6 +36,9 @@ def insert_doc():
         elasticsearch.index(index_name, doc_type="_doc",
                             body=doc)
         print("Indexed " + str(doc) + " successfully")
+        print("Waiting for 3 seconds for changes to reflect")
+        time.sleep(3)
+
     except:
         print("Failed")
 
@@ -45,9 +47,6 @@ def search_results():
     print("Trying to search for `Rahul` from", index_name)
     try:
         print(elasticsearch.search(index_name, q="Rahul"))
-        # elasticsearch.index(index_name, doc_type="_doc",
-        #                     body={"age": 21, "first name": "Rahul", "last name": "Reddy"})
-        # print("Added document successfully")
     except:
         print("Failed")
 
@@ -67,6 +66,8 @@ def delete_index():
 
 
 if __name__ == "__main__":
+    elasticsearch = Elasticsearch()
+    index_name = "nominatim_test"
     test_es_connection()
     create_index()
     insert_doc()
