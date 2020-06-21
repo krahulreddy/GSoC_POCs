@@ -1,5 +1,5 @@
 import psycopg2
-from psycopg2.extras import RealDictCursor, DictCursor
+from psycopg2.extras import RealDictCursor, DictCursor, register_hstore
 from Doc import Doc
 import json
 
@@ -24,6 +24,7 @@ def connect_to_db():
             port="5432",
             database="nominatim"
         )
+        register_hstore(connection, globally=True, unicode=True)
         print("Success")
         return connection
     except:
@@ -73,8 +74,9 @@ where name->'name' like '" + name + "' limit 1 "
     #     postcode = record.values()
     doc = Doc(record)
 
-    print("osm_id: ", doc.osm_id)
-    print("osm_type: ", doc.osm_type)
+    print("osm_id:", doc.osm_id)
+    print("osm_type:", doc.osm_type)
+    print("name tags as dictionary:", doc.name)
     cursor.close()
     return doc
 
