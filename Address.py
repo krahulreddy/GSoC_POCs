@@ -5,7 +5,8 @@ import time
 import pprint
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
+def get_addresses(count):
     connection = connect_to_db()
 
     addresses = {}
@@ -73,7 +74,7 @@ if __name__ == "__main__":
             addresses[placex_record["place_id"]] = add
 
     addresses = {}
-    doc_count = 50000
+    doc_count = count
     # for doc_count in doc_counts:
 
     print("================================================================")
@@ -173,4 +174,5 @@ if __name__ == "__main__":
             print(add)
         addresses[p_record["place_id"]] = add
         
-    pprint.pprint(addresses)
+    # pprint.pprint(addresses)
+    return addresses
