@@ -46,7 +46,7 @@ if __name__ == "__main__":
         print("For {} docs, Average indexing time is {} seconds per doc.".format(doc_count, average_time))
 
 
-    doc_count = 80000
+    doc_count = 100000
         # th = 40000
     print("================================================================")
     sql = "SELECT place_id, osm_id, osm_type, name, address, \
@@ -58,7 +58,7 @@ if __name__ == "__main__":
     records = cursor.fetchall()
     addresses = get_addresses(doc_count)
     avg_rates = []
-    ths = range(80000, 1000, -5000)
+    ths = range(1000, 100000, 5000)
     for th in ths:
         print("================================================================")
         print("th =", th)
