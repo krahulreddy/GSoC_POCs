@@ -56,7 +56,7 @@ def form_parent_address(connection, record, tag):
     if record["rank_search"] < 5:
         # print("<5. Handle this")
         print("<5")
-        if record['name']:
+        if record['name'] and record['name']['name']:
             
             return record['name']['name']
         return record['name']
@@ -92,7 +92,7 @@ def form_address(connection, record):
     if record["rank_search"] < 5:
         # print("<5. Handle this")
         print("<5")
-        if record['name']:
+        if record['name'] and record['name']['name']:
             
             return record['name']['name']
         return record['name']
@@ -116,14 +116,18 @@ def form_address(connection, record):
     if not record['name']:
         return ""
     add = {}
+    parent_record = fetch_record(connection, record['parent_place_id'])
     for tag in record['name'].keys():
         if "name" not in tag:
             continue
-        # print(record['name'][tag])
+        parent = ""
+        if parent_record:
+            if tag in parent_record:
+                parent = ", " + parent_record['name'][tag]
         if a_record:
-            add[tag.replace("name", "addr")] = record['name'][tag] + ", " + form_parent_address(connection, fetch_record(connection, a_record['address_place_id']), tag)
+            add[tag.replace("name", "addr")] = record['name'][tag] + parent + ", " + form_parent_address(connection, fetch_record(connection, a_record['address_place_id']), tag)
         else:
-            add[tag.replace("name", "addr")] = record['name'][tag]
+            add[tag.replace("name", "addr")] = record['name'][tag] + parent
     # print(add)
     return add
 
@@ -182,6 +186,9 @@ def form_address(connection, record):
 """
 
 def fetch_record(connection, place_id):
+    if not place_id:
+        return None
+
     sql = "SELECT place_id, parent_place_id, name, address, country_code,\
          housenumber, postcode, rank_search, rank_address from placex \
               where place_id=" + str(place_id)
@@ -193,4 +200,4 @@ def fetch_record(connection, place_id):
     record = cursor.fetchone()
     return record
 
-print(get_add(100, 2000))
+print(get_add(1000, 2000))
