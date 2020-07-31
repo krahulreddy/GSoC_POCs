@@ -9,7 +9,7 @@ import pprint
 def get_add(count, bucket):
     connection = connect_to_db()
 
-    index_name = "nominatim_suggestions"
+    index_name = "nominatim"
     elasticsearch = test_es_connection()
     delete_index(elasticsearch, index_name)
     create_index(elasticsearch, index_name)
@@ -53,6 +53,7 @@ order by rank_search limit " + str(doc_count)
         # Formed address: {'formed_address': {'addr': 'Juberri, Sant Julià de Lòria, Sant Julià de Lòria', 'addr:ca': 'Juberri, Sant Julià de Lòria', 'addr:ru': 'Джубери, Сант-Жулия-де-Лория'}, 'postcode': 'AD600', 'country_code': 'ad'}
         formed_address = form_address(connection, record)
         doc = formed_address
+        doc.update({'place_id': record['place_id']})
         if 'osm_id' in record:
             #  and record['osm_type']:
             doc.update({'osm_id': record['osm_id'], 'osm_type': record['osm_type']})
@@ -100,11 +101,11 @@ def form_parent_address(connection, record, tag):
     a_record = cursor.fetchone()
     
     if a_record:
-        if record['name'][tag]:
-            return record['name'][tag] + "," + form_parent_address(connection, fetch_record(connection, a_record['address_place_id']), tag)
+        if tag in record['name']:
+            return record['name'][tag] + ", " + form_parent_address(connection, fetch_record(connection, a_record['address_place_id']), tag)
         else:
-            return form_parent_address(connection, fetch_record(connection, a_record['address_place_id']), tag)
-    if tag in record['name']:
+            return record['name']['name'] + "' " + form_parent_address(connection, fetch_record(connection, a_record['address_place_id']), tag)
+    if tag in record['name'] and record['name'][tag]:
         return record['name'][tag]
     return ""
 
@@ -145,6 +146,7 @@ def form_address(connection, record):
         if parent_record and 'name' in parent_record and parent_record['name']:
             if tag in parent_record['name']:
                 parent = ", " + parent_record['name'][tag]
+        parent = ''
         if a_record:
             add[tag.replace("name", "addr")] = record['name'][tag] + parent + ", " + form_parent_address(connection, fetch_record(connection, a_record['address_place_id']), tag)
         else:
@@ -221,4 +223,4 @@ def fetch_record(connection, place_id):
     record = cursor.fetchone()
     return record
 
-print(get_add(100000, 20000))
+print(get_add(500000, 20000))
